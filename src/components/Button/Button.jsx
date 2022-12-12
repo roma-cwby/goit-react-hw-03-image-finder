@@ -1,6 +1,6 @@
 export const Button = ({ text, click }) => {
   return (
-    <button type="button" onClick={click}>
+    <button className="Button" type="button" onClick={click}>
       {text}
     </button>
   );

@@ -1,10 +1,10 @@
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 
-export const ImageGallery = ({ images }) => {
+export const ImageGallery = ({ images, onClick }) => {
   return (
-    <ul>
+    <ul className="ImageGallery" onClick={onClick}>
       {images.map(image => (
-        <ImageGalleryItem img={image} />
+        <ImageGalleryItem key={image.id} img={image} />
       ))}
     </ul>
   );
