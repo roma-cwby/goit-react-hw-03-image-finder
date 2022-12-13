@@ -5,6 +5,7 @@ import { ImageGallery } from 'components/ImageGallery/ImageGallery';
 import { Button } from 'components/Button/Button';
 import { Loader } from 'components/Loader/Loader';
 import { Modal } from 'components/Modal/Modal';
+import { Error } from 'components/Error/Error';
 
 export class App extends Component {
   state = {
@@ -14,6 +15,7 @@ export class App extends Component {
     isLoad: false,
     error: false,
     modalImg: null,
+    isAll: false,
   };
 
   async componentDidUpdate(prevProps, prevState) {
@@ -22,14 +24,15 @@ export class App extends Component {
       prevState.page !== this.state.page
     ) {
       try {
-        this.setState({ isLoad: true, error: false });
+        this.setState({ isLoad: true, error: false, isAll: false });
         const newImgs = await fetchImg(this.state.request, this.state.page);
 
-        if (newImgs.length < 1) throw new Error();
+        if (newImgs[0].length < 1) throw new Error();
+        if (newImgs[1]) this.setState({ isAll: true });
 
         this.setState(prevState => {
           return {
-            images: prevState.images.concat(newImgs),
+            images: prevState.images.concat(newImgs[0]),
           };
         });
       } catch (error) {
@@ -42,10 +45,11 @@ export class App extends Component {
 
   onRequest = e => {
     e.preventDefault();
+    const input = e.target.elements[1].value;
+    e.target.reset();
     this.setState(prevState => {
-      if (prevState.request !== e.target.elements[1].value) {
-      }
-      return { request: e.target.elements[1].value, page: 1, images: [] };
+      if (prevState.request !== input)
+        return { request: input, page: 1, images: [] };
     });
   };
 
@@ -74,10 +78,6 @@ export class App extends Component {
       <>
         <Searchbar onSubmit={this.onRequest} />
 
-        {this.state.error && (
-          <p style={{ color: 'red', margin: 'auto' }}>Error</p>
-        )}
-
         {this.state.modalImg && (
           <Modal img={this.state.modalImg} closeModal={this.closeModal}>
             {<img src={this.state.modalImg} alt="" />}
@@ -90,9 +90,14 @@ export class App extends Component {
 
         {this.state.isLoad && <Loader />}
 
-        {this.state.images.length > 0 && !this.state.isLoad && (
-          <Button text="Load more" click={this.onLoad} />
-        )}
+        {this.state.error && !this.state.isAll && <Error message="Error" />}
+
+        {this.state.isAll && <Error message="Is all" />}
+
+        {this.state.images.length > 0 &&
+          !this.state.isLoad &&
+          !this.state.error &&
+          !this.state.isAll && <Button text="Load more" click={this.onLoad} />}
       </>
     );
   }
